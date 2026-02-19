@@ -16,7 +16,7 @@ The whole conversation is preserved, so Claude learns from errors mid-session an
 
 ## Demo
 
-https://github.com/user-attachments/assets/cca7e666-d4f5-48de-8fca-dce514af1668
+https://github.com/user-attachments/assets/e94dde45-b5cf-4467-bc84-6a98e5c56f20
 
 Built a house from scratch using only natural language prompts:
 
