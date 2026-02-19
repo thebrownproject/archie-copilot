@@ -1,0 +1,549 @@
+<Page x:Class="ArchieCopilot.ChatPanel"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Background="#1B1B1F">
+
+    <Page.Resources>
+        <!-- Color palette -->
+        <Color x:Key="AccentColor">#D4944C</Color>
+        <Color x:Key="AccentHoverColor">#E0A86A</Color>
+        <Color x:Key="AccentDimColor">#A06B30</Color>
+        <Color x:Key="SurfaceColor">#232328</Color>
+        <Color x:Key="SurfaceElevatedColor">#2A2A30</Color>
+        <Color x:Key="SurfaceHighColor">#35353D</Color>
+        <Color x:Key="BorderSubtleColor">#3A3A42</Color>
+        <Color x:Key="TextPrimaryColor">#EAEAEC</Color>
+        <Color x:Key="TextSecondaryColor">#8E8E96</Color>
+        <Color x:Key="SuccessColor">#5BA67A</Color>
+        <Color x:Key="ErrorColor">#C75450</Color>
+
+        <SolidColorBrush x:Key="Accent" Color="{StaticResource AccentColor}" />
+        <SolidColorBrush x:Key="AccentHover" Color="{StaticResource AccentHoverColor}" />
+        <SolidColorBrush x:Key="AccentDim" Color="{StaticResource AccentDimColor}" />
+        <SolidColorBrush x:Key="Surface" Color="{StaticResource SurfaceColor}" />
+        <SolidColorBrush x:Key="SurfaceElevated" Color="{StaticResource SurfaceElevatedColor}" />
+        <SolidColorBrush x:Key="SurfaceHigh" Color="{StaticResource SurfaceHighColor}" />
+        <SolidColorBrush x:Key="BorderSubtle" Color="{StaticResource BorderSubtleColor}" />
+        <SolidColorBrush x:Key="TextPrimary" Color="{StaticResource TextPrimaryColor}" />
+        <SolidColorBrush x:Key="TextSecondary" Color="{StaticResource TextSecondaryColor}" />
+
+        <!-- Reusable rounded button template -->
+        <Style x:Key="PillButton" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ==================== MESSAGE TEMPLATES ==================== -->
+
+        <!-- User message -->
+        <DataTemplate x:Key="UserMessageTemplate">
+            <StackPanel Margin="50,4,14,4" HorizontalAlignment="Right">
+                <Border CornerRadius="14,14,4,14" Padding="14,10">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#D4944C" Offset="0" />
+                            <GradientStop Color="#B87A38" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <TextBlock Text="{Binding Text}" Foreground="#FFFDF8" TextWrapping="Wrap"
+                               FontSize="13.5" LineHeight="20" FontFamily="Segoe UI" />
+                </Border>
+                <TextBlock Text="{Binding Timestamp}" Foreground="#5A5A62" FontSize="10"
+                           HorizontalAlignment="Right" Margin="0,3,4,0" FontFamily="Segoe UI" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Assistant text message -->
+        <DataTemplate x:Key="AssistantMessageTemplate">
+            <StackPanel Margin="14,4,50,4" HorizontalAlignment="Left">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <!-- Avatar dot -->
+                    <Border Grid.Column="0" Width="26" Height="26" CornerRadius="13"
+                            VerticalAlignment="Top" Margin="0,2,10,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#D4944C" Offset="0" />
+                                <GradientStop Color="#A06B30" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <TextBlock Text="A" Foreground="#FFFDF8" FontSize="12" FontWeight="Bold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   FontFamily="Segoe UI" />
+                    </Border>
+                    <Border Grid.Column="1" Background="#2A2A30" CornerRadius="4,14,14,14" Padding="14,10"
+                            BorderBrush="#3A3A42" BorderThickness="1">
+                        <TextBlock Text="{Binding Text}" Foreground="#EAEAEC" TextWrapping="Wrap"
+                                   FontSize="13.5" LineHeight="20" FontFamily="Segoe UI" />
+                    </Border>
+                </Grid>
+                <TextBlock Text="{Binding Timestamp}" Foreground="#5A5A62" FontSize="10"
+                           HorizontalAlignment="Left" Margin="36,3,0,0" FontFamily="Segoe UI" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Code block -->
+        <DataTemplate x:Key="CodeBlockTemplate">
+            <Border Margin="14,6,24,6" HorizontalAlignment="Left"
+                    Background="#18181C" CornerRadius="10"
+                    BorderBrush="#3A3A42" BorderThickness="1">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="12" ShadowDepth="2" Opacity="0.25" />
+                </Border.Effect>
+                <StackPanel>
+                    <!-- Code header bar -->
+                    <Border CornerRadius="10,10,0,0" Padding="12,7" Background="#232328"
+                            BorderBrush="#3A3A42" BorderThickness="0,0,0,1">
+                        <DockPanel>
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                <Ellipse Width="7" Height="7" Fill="#D4944C" Margin="0,0,6,0" />
+                                <TextBlock Text="python" Foreground="#8E8E96" FontSize="11"
+                                           FontFamily="Cascadia Code, Consolas" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Button Content="Copy" Click="CopyCode_Click" Tag="{Binding Text}"
+                                    DockPanel.Dock="Right" Background="Transparent" Foreground="#8E8E96"
+                                    FontSize="11" Padding="8,3" FontFamily="Segoe UI"
+                                    Style="{StaticResource PillButton}" />
+                        </DockPanel>
+                    </Border>
+                    <!-- Code content -->
+                    <TextBox Text="{Binding Text, Mode=OneWay}" Foreground="#C8C8CC" Background="Transparent"
+                             FontFamily="Cascadia Code, Consolas" FontSize="12.5" IsReadOnly="True"
+                             TextWrapping="Wrap" BorderThickness="0" Padding="14,12"
+                             VerticalScrollBarVisibility="Auto" MaxHeight="350" />
+                    <!-- Action bar -->
+                    <Border Padding="12,8,12,10" Background="#1E1E22" CornerRadius="0,0,10,10"
+                            BorderBrush="#3A3A42" BorderThickness="0,1,0,0">
+                        <Button Content="▶  Run in Revit" Click="ExecuteCode_Click" Tag="{Binding Text}"
+                                Foreground="#FFFDF8" Padding="18,8"
+                                FontSize="12.5" FontWeight="SemiBold" FontFamily="Segoe UI"
+                                HorizontalAlignment="Left" Cursor="Hand" BorderThickness="0">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Bd" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                            <GradientStop Color="#D4944C" Offset="0" />
+                                                            <GradientStop Color="#B87A38" Offset="1" />
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bd" Property="Background">
+                                                            <Setter.Value>
+                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                                    <GradientStop Color="#E0A86A" Offset="0" />
+                                                                    <GradientStop Color="#D4944C" Offset="1" />
+                                                                </LinearGradientBrush>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <!-- Result message -->
+        <DataTemplate x:Key="ResultMessageTemplate">
+            <Border CornerRadius="8" Padding="12,10" Margin="50,4,24,4"
+                    HorizontalAlignment="Left" BorderThickness="1,1,1,1">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="#1C2B22" />
+                        <Setter Property="BorderBrush" Value="#2E6B42" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsError}" Value="True">
+                                <Setter Property="Background" Value="#2B1C1C" />
+                                <Setter Property="BorderBrush" Value="#8B3A38" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                        <TextBlock FontSize="11" FontFamily="Segoe UI" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="&#x2713;" />
+                                    <Setter Property="Foreground" Value="#5BA67A" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsError}" Value="True">
+                                            <Setter Property="Text" Value="&#x2717;" />
+                                            <Setter Property="Foreground" Value="#C75450" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock FontSize="10.5" FontFamily="Segoe UI" VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="Output" />
+                                    <Setter Property="Foreground" Value="#5BA67A" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsError}" Value="True">
+                                            <Setter Property="Text" Value="Error" />
+                                            <Setter Property="Foreground" Value="#C75450" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                    <TextBlock Text="{Binding Text}" Foreground="#C8C8CC" Background="Transparent"
+                               FontFamily="Segoe UI" FontSize="12.5"
+                               TextWrapping="Wrap" LineHeight="18" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <!-- Loading indicator -->
+        <DataTemplate x:Key="LoadingMessageTemplate">
+            <StackPanel Margin="14,4,50,4" HorizontalAlignment="Left">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Width="26" Height="26" CornerRadius="13"
+                            VerticalAlignment="Top" Margin="0,2,10,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#D4944C" Offset="0" />
+                                <GradientStop Color="#A06B30" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <TextBlock Text="A" Foreground="#FFFDF8" FontSize="12" FontWeight="Bold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   FontFamily="Segoe UI" />
+                    </Border>
+                    <Border Grid.Column="1" Background="#2A2A30" CornerRadius="4,14,14,14" Padding="16,12"
+                            BorderBrush="#3A3A42" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse x:Name="Dot1" Width="7" Height="7" Fill="#D4944C" Margin="0,0,5,0" Opacity="0.25" />
+                            <Ellipse x:Name="Dot2" Width="7" Height="7" Fill="#D4944C" Margin="0,0,5,0" Opacity="0.25" />
+                            <Ellipse x:Name="Dot3" Width="7" Height="7" Fill="#D4944C" Margin="0,0,0,0" Opacity="0.25" />
+                        </StackPanel>
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetName="Dot1" Storyboard.TargetProperty="Opacity"
+                                                         From="0.25" To="1.0" Duration="0:0:0.5" BeginTime="0:0:0"
+                                                         AutoReverse="True" />
+                                        <DoubleAnimation Storyboard.TargetName="Dot2" Storyboard.TargetProperty="Opacity"
+                                                         From="0.25" To="1.0" Duration="0:0:0.5" BeginTime="0:0:0.15"
+                                                         AutoReverse="True" />
+                                        <DoubleAnimation Storyboard.TargetName="Dot3" Storyboard.TargetProperty="Opacity"
+                                                         From="0.25" To="1.0" Duration="0:0:0.5" BeginTime="0:0:0.3"
+                                                         AutoReverse="True" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                    </Border>
+                </Grid>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Welcome template -->
+        <DataTemplate x:Key="WelcomeMessageTemplate">
+            <Border Margin="14,20,14,10" HorizontalAlignment="Stretch">
+                <StackPanel HorizontalAlignment="Center">
+                    <!-- Logo circle -->
+                    <Border Width="48" Height="48" CornerRadius="24" HorizontalAlignment="Center" Margin="0,0,0,14">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#D4944C" Offset="0" />
+                                <GradientStop Color="#A06B30" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <TextBlock Text="A" Foreground="#FFFDF8" FontSize="22" FontWeight="Bold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   FontFamily="Segoe UI" />
+                    </Border>
+                    <TextBlock Text="Archie Copilot" Foreground="#EAEAEC" FontSize="18" FontWeight="Bold"
+                               HorizontalAlignment="Center" FontFamily="Segoe UI" />
+                    <TextBlock Text="AI-powered Revit assistant" Foreground="#8E8E96" FontSize="12.5"
+                               HorizontalAlignment="Center" Margin="0,4,0,18" FontFamily="Segoe UI" />
+
+                    <!-- Suggestion chips -->
+                    <WrapPanel HorizontalAlignment="Center" MaxWidth="320">
+                        <Button Content="List all walls" Click="Suggestion_Click" Tag="List all walls in the project"
+                                Background="#2A2A30" Foreground="#C8C8CC" Padding="12,7" Margin="3"
+                                FontSize="12" FontFamily="Segoe UI"
+                                BorderThickness="1" BorderBrush="#3A3A42" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                                        CornerRadius="16" Padding="{TemplateBinding Padding}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bd" Property="BorderBrush" Value="#D4944C" />
+                                                        <Setter TargetName="Bd" Property="Background" Value="#35353D" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Content="Create a floor" Click="Suggestion_Click" Tag="Create a 20x20 foot floor on Level 0"
+                                Background="#2A2A30" Foreground="#C8C8CC" Padding="12,7" Margin="3"
+                                FontSize="12" FontFamily="Segoe UI"
+                                BorderThickness="1" BorderBrush="#3A3A42" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                                        CornerRadius="16" Padding="{TemplateBinding Padding}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bd" Property="BorderBrush" Value="#D4944C" />
+                                                        <Setter TargetName="Bd" Property="Background" Value="#35353D" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Content="Count elements" Click="Suggestion_Click" Tag="Count all elements in the project grouped by category"
+                                Background="#2A2A30" Foreground="#C8C8CC" Padding="12,7" Margin="3"
+                                FontSize="12" FontFamily="Segoe UI"
+                                BorderThickness="1" BorderBrush="#3A3A42" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                                        CornerRadius="16" Padding="{TemplateBinding Padding}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bd" Property="BorderBrush" Value="#D4944C" />
+                                                        <Setter TargetName="Bd" Property="Background" Value="#35353D" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Content="Place a wall" Click="Suggestion_Click" Tag="Place a 20 foot long wall at the origin"
+                                Background="#2A2A30" Foreground="#C8C8CC" Padding="12,7" Margin="3"
+                                FontSize="12" FontFamily="Segoe UI"
+                                BorderThickness="1" BorderBrush="#3A3A42" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                                        CornerRadius="16" Padding="{TemplateBinding Padding}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bd" Property="BorderBrush" Value="#D4944C" />
+                                                        <Setter TargetName="Bd" Property="Background" Value="#35353D" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Padding="14,9" Background="#232328"
+                BorderBrush="#3A3A42" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                    <Border Width="22" Height="22" CornerRadius="5" Margin="0,0,9,0" VerticalAlignment="Center">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#D4944C" Offset="0" />
+                                <GradientStop Color="#A06B30" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <TextBlock Text="A" Foreground="#FFFDF8" FontSize="11" FontWeight="Bold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe UI" />
+                    </Border>
+                    <TextBlock Text="Archie" Foreground="#EAEAEC" FontSize="14.5" FontWeight="Bold"
+                               VerticalAlignment="Center" FontFamily="Segoe UI" />
+                    <TextBlock Text="Copilot" Foreground="#D4944C" FontSize="14.5" FontWeight="Normal"
+                               VerticalAlignment="Center" Margin="5,0,0,0" FontFamily="Segoe UI" />
+                </StackPanel>
+                <Button x:Name="ClearButton" Content="Clear" Click="Clear_Click"
+                        DockPanel.Dock="Right" Background="Transparent" Foreground="#8E8E96"
+                        FontSize="11" Padding="8,4" FontFamily="Segoe UI" VerticalAlignment="Center"
+                        Style="{StaticResource PillButton}" />
+            </DockPanel>
+        </Border>
+
+        <!-- Messages -->
+        <ScrollViewer Grid.Row="1" x:Name="MessagesScroll" VerticalScrollBarVisibility="Auto"
+                      Background="#1B1B1F" Padding="0,6">
+            <ItemsControl x:Name="MessagesPanel" />
+        </ScrollViewer>
+
+        <!-- Input area -->
+        <Border Grid.Row="2" Background="#232328" Padding="12,10"
+                BorderBrush="#3A3A42" BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <!-- Input with placeholder -->
+                <Grid Grid.Column="0">
+                    <TextBox x:Name="InputBox"
+                             Background="#2A2A30" Foreground="#EAEAEC" CaretBrush="#D4944C"
+                             Padding="12,9" FontSize="13.5" BorderThickness="0"
+                             AcceptsReturn="True" TextWrapping="Wrap"
+                             MaxHeight="120" MinHeight="36" FontFamily="Segoe UI"
+                             VerticalScrollBarVisibility="Auto"
+                             KeyDown="InputBox_KeyDown" TextChanged="InputBox_TextChanged">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TextBox">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="8" Padding="{TemplateBinding Padding}"
+                                                    BorderBrush="#3A3A42" BorderThickness="1">
+                                                <ScrollViewer x:Name="PART_ContentHost" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                    <TextBlock x:Name="PlaceholderText" Text="Ask Archie to modify your model..."
+                               Foreground="#5A5A62" FontSize="13.5" FontFamily="Segoe UI"
+                               IsHitTestVisible="False" VerticalAlignment="Center"
+                               Margin="14,0,0,0" />
+                </Grid>
+                <!-- Send button -->
+                <Button x:Name="SendButton" Grid.Column="1" Click="Send_Click"
+                        Padding="12,8" Margin="8,0,0,0" Cursor="Hand" BorderThickness="0"
+                        VerticalAlignment="Bottom">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bd" CornerRadius="8" Padding="{TemplateBinding Padding}" Width="38" Height="38">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#D4944C" Offset="0" />
+                                                    <GradientStop Color="#B87A38" Offset="1" />
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <!-- Arrow icon -->
+                                            <Path Data="M6,0 L12,6 L8,6 L8,14 L4,14 L4,6 L0,6 Z"
+                                                  Fill="#FFFDF8" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  RenderTransformOrigin="0.5,0.5">
+                                                <Path.RenderTransform>
+                                                    <RotateTransform Angle="0" />
+                                                </Path.RenderTransform>
+                                            </Path>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bd" Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                            <GradientStop Color="#E0A86A" Offset="0" />
+                                                            <GradientStop Color="#D4944C" Offset="1" />
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="Bd" Property="Background">
+                                                    <Setter.Value>
+                                                        <SolidColorBrush Color="#3A3A42" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Footer -->
+        <Border Grid.Row="3" Background="#1B1B1F" Padding="0,4,0,5">
+            <TextBlock Text="Shift+Enter for new line" Foreground="#3A3A42"
+                       FontSize="9.5" HorizontalAlignment="Center" FontFamily="Segoe UI" />
+        </Border>
+    </Grid>
+</Page>

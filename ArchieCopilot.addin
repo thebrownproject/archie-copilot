@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Archie Copilot</Name>
+    <Assembly>ArchieCopilot.dll</Assembly>
+    <FullClassName>ArchieCopilot.App</FullClassName>
+    <AddInId>B5F5C9A2-7D3E-4A1B-9C8F-2E6D4A3B1C0D</AddInId>
+    <VendorId>ArchieCopilot</VendorId>
+    <VendorDescription>Archie Copilot - AI-powered Revit assistant</VendorDescription>
+  </AddIn>
+</RevitAddIns>
