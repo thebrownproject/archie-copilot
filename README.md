@@ -1,6 +1,6 @@
 # Archie Copilot
 
-**Talk to Revit. It listens.**
+**Talk to Revit. Watch it build.**
 
 A dockable chat panel for Autodesk Revit 2025 that turns natural language into executable IronPython code. Ask it to create walls, floors, roofs. It generates the code, runs it, and if something breaks, it fixes itself automatically.
 
